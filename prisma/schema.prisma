@@ -1,0 +1,54 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["relationJoins"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id       String  @id @default(uuid())
+  username String  @db.VarChar(100)
+  password String  @db.VarChar(100)
+  name     String  @db.VarChar(100)
+  rate     Int
+  token    String? @db.VarChar(100)
+
+  TimeSheet TimeSheet[]
+
+  @@map("users")
+}
+
+model TimeSheet {
+  id         String   @id @default(uuid())
+  user_id    String   @db.VarChar(100)
+  start_date DateTime @db.Date()
+  end_date   DateTime @db.Date()
+  start_time String   @db.VarChar(10)
+  end_time   String   @db.VarChar(10)
+  title      String   @db.VarChar(100)
+  project_id String   @db.VarChar(100)
+  duration   Int
+
+  user    User    @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  project Project @relation(fields: [project_id], references: [id], onDelete: NoAction)
+
+  @@map("timesheets")
+}
+
+model Project {
+  id   String @id @default(uuid())
+  name String @db.VarChar(100)
+
+  TimeSheet TimeSheet[]
+
+  @@map("projects")
+}
